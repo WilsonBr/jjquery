@@ -1,5 +1,9 @@
 package org.wfreitas.jjquery;
 
+import java.util.List;
+
+import org.wfreitas.jjquery.predicate.Predicate;
+
 /**
  * JQuery style wrapper for java lists
  * @author wilson
@@ -19,4 +23,14 @@ public interface Wrapper {
    * @return
    */
   Object attr(String name);
+  
+  Object val();
+  
+  Wrapper find(String query);
+  
+  Wrapper find(Class clazz);
+  
+  Wrapper find(Predicate predicate);
+  
+  List<Object> asList();
 }
