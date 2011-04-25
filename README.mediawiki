@@ -1,12 +1,12 @@
-= BeanQuery =
+= JJQuery =
 == Introduction ==
 Parsing object graphs is an error prone and tedious task. Java is a great language but its lack of collections and hash native support force developers to write lots of code to traverse and filter stuff from in memory object graphs.
  
-BeanQuery brings the power of JQuery like wrappers to Java programming. BeanQuery helps to write complex object filtering and manipulation code with very low effort.
+JJQuery brings the power of JQuery like wrappers to Java programming. JJQuery helps to write complex object filtering and manipulation code with very low effort.
 
 == Installation == 
 JJQuery is not yet hosted in any maven public repository so you have to install it to your local repository:
-* git clone <>
+* git clone git@github.com:WilsonBr/jjquery.git
 * cd jjquery
 * mvn install
 
@@ -26,7 +26,7 @@ To use it in your project just add the dependency to your pom.xml:
 MyBean myBean = new MyBean();
 myBean.setName("Test bean");
 
-Wrapper myWrappedObject = BeanQuery.newInstance(myBean);
+Wrapper myWrappedObject = JJQuery.newInstance(myBean);
 assert myWrappedObject.attr("name").equals("Test bean");
 
 myWrappedObject.attr("name", "Changed name");
@@ -45,7 +45,7 @@ MyBean myBean2 = new MyBean();
 myBean2.setName("Test bean 2");
 beans.add(myBean2);
 
-Wrapper myWrappedList = BeanQuery.newInstance(beans);
+Wrapper myWrappedList = JJQuery.newInstance(beans);
 
 myWrappedList.attr("name", "Changed name");
 
@@ -56,7 +56,7 @@ assert myBean2.name.equals("Changed name");
 ==== Find objects by type ====
 <pre>
 // Traverse bean list and select all String bean properties
-Wrapper byTypeResult = BeanQuery.newInstance(beans).find(String.class);
+Wrapper byTypeResult = JJQuery.newInstance(beans).find(String.class);
 
 List names = byTypeResult.asList(); // ["Changed name", "Changed name"]
 
@@ -77,7 +77,7 @@ myBean2.setName("Evil");
 beans.add(myBean2);
 
 // Apply attribute bean filter
-Wrapper byAttrResult = BeanQuery.newInstance(beans).find("[name = 'Evil']");
+Wrapper byAttrResult = JJQuery.newInstance(beans).find("[name = 'Evil']");
 
 assert byAttrResult.val() instanceof TestBean;
 assert byAttrResult.asList.size() == 1;
@@ -113,7 +113,7 @@ coordinates.add(new Coordinate(2, 1));
 coordinates.add(new Coordinate(2, 2));
 
 // Filter coordinates with X==Y
-Wrapper byPredicateResult = BeanQuery.newInstance(coordinates).find(new ObjectPredicate(){
+Wrapper byPredicateResult = JJQuery.newInstance(coordinates).find(new ObjectPredicate(){
   @Override
   public boolean evaluate(Object value) {
     boolean result = (value instanceof Coordinate);
@@ -142,7 +142,7 @@ coordinates.add(new Coordinate(2, 1));
 coordinates.add(new Coordinate(2, 2));
 
 // Filter coordinates with X==Y and change X coordinate to 3
-Wrapper byChainResult = BeanQuery.newInstance(coordinates).find(Coordinate.class).find(new ObjectPredicate(){
+Wrapper byChainResult = JJQuery.newInstance(coordinates).find(Coordinate.class).find(new ObjectPredicate(){
   @Override
   public boolean evaluate(Object value) {
     return ((Coordinate)value).getX() == coordinate.getY();
