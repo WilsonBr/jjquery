@@ -1,0 +1,157 @@
+= BeanQuery =
+== Introduction ==
+Parsing object graphs is an error prone and tedious task. Java is a great language but its lack of collections and hash native support force developers to write lots of code to traverse and filter stuff from in memory object graphs.
+ 
+BeanQuery brings the power of JQuery like wrappers to Java programming. BeanQuery helps to write complex object filtering and manipulation code with very low effort.
+
+== Installation == 
+JJQuery is not yet hosted in any maven public repository so you have to install it to your local repository:
+* git clone <>
+* cd jjquery
+* mvn install
+
+To use it in your project just add the dependency to your pom.xml:
+<pre>
+<dependency>
+  <groupId>org.wfreitas</groupId>
+  <artifactId>jjquery</artifactId>
+  <version>1.0</version>
+</dependency>
+</pre>
+
+== Tutorial ==
+=== Wrapping objects ===
+==== Single object ====
+<pre>
+MyBean myBean = new MyBean();
+myBean.setName("Test bean");
+
+Wrapper myWrappedObject = BeanQuery.newInstance(myBean);
+assert myWrappedObject.attr("name").equals("Test bean");
+
+myWrappedObject.attr("name", "Changed name");
+assert myWrappedObject.attr("name").equals("Changed name");
+</pre>
+
+==== Lists ====
+<pre>
+List beans = new ArrayList();
+
+MyBean myBean1 = new MyBean();
+myBean1.setName("Test bean 1");
+beans.add(myBean1);
+
+MyBean myBean2 = new MyBean();
+myBean2.setName("Test bean 2");
+beans.add(myBean2);
+
+Wrapper myWrappedList = BeanQuery.newInstance(beans);
+
+myWrappedList.attr("name", "Changed name");
+
+assert myBean1.name.equals("Changed name");
+assert myBean2.name.equals("Changed name");
+</pre>
+
+==== Find objects by type ====
+<pre>
+// Traverse bean list and select all String bean properties
+Wrapper byTypeResult = BeanQuery.newInstance(beans).find(String.class);
+
+List names = byTypeResult.asList(); // ["Changed name", "Changed name"]
+
+assert names.size() == 2;
+assert names[0].equals(myBean1.getName());
+</pre>
+
+==== Find objects by attribute value ====
+<pre>
+List beans = new ArrayList();
+
+MyBean myBean1 = new MyBean();
+myBean1.setName("Good");
+beans.add(myBean1);
+
+MyBean myBean2 = new MyBean();
+myBean2.setName("Evil");
+beans.add(myBean2);
+
+// Apply attribute bean filter
+Wrapper byAttrResult = BeanQuery.newInstance(beans).find("[name = 'Evil']");
+
+assert byAttrResult.val() instanceof TestBean;
+assert byAttrResult.asList.size() == 1;
+assert ((TestBean)byAttrResult.val()).name.equals("Evil");
+</pre>
+
+==== Find objects by custom predicate ====
+<pre>
+public class Coordinate{
+  private Integer x;
+  private Integer y;
+  
+  public Integer getX(){
+    return x;
+  }
+  
+  public Integer getY(){
+    return y;
+  }
+  
+  public Coordinate(x, y){
+    this.x = x;
+    this.y = y;
+  }
+}
+
+...
+
+List coordinates = new ArrayList();
+coordinates.add(new Coordinate(1, 1));
+coordinates.add(new Coordinate(1, 2));
+coordinates.add(new Coordinate(2, 1));
+coordinates.add(new Coordinate(2, 2));
+
+// Filter coordinates with X==Y
+Wrapper byPredicateResult = BeanQuery.newInstance(coordinates).find(new ObjectPredicate(){
+  @Override
+  public boolean evaluate(Object value) {
+    boolean result = (value instanceof Coordinate);
+    if(result){
+      Coordinate coordinate = (Coordinate)value;
+      result = coordinate.getX() == coordinate.getY();
+    }
+    return result;
+  }
+}); 
+
+List filteredCoordinates = byPredicateResult.asList();
+assert filteredCoordinates.size() == 2;
+for(Object coordinate : filteredCoordinates){
+  assert ((Coordinate)coordinate).getX() == ((Coordinate)coordinate).getY();
+} 
+
+</pre>
+
+==== Chain wrappers and modify bean attributes ====
+<pre>
+List coordinates = new ArrayList();
+coordinates.add(new Coordinate(1, 1));
+coordinates.add(new Coordinate(1, 2));
+coordinates.add(new Coordinate(2, 1));
+coordinates.add(new Coordinate(2, 2));
+
+// Filter coordinates with X==Y and change X coordinate to 3
+Wrapper byChainResult = BeanQuery.newInstance(coordinates).find(Coordinate.class).find(new ObjectPredicate(){
+  @Override
+  public boolean evaluate(Object value) {
+    return ((Coordinate)value).getX() == coordinate.getY();
+  }
+}).attr("x", 3); 
+
+List filteredCoordinates = byChainResult();
+assert filteredCoordinates.size() == 2;
+for(Object coordinate : filteredCoordinates){
+  assert ((Coordinate)coordinate).getX() == 3;
+} 
+</pre>
